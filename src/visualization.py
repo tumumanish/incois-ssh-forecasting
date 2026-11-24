@@ -119,6 +119,21 @@ def seven_plus_three_chart(
     ))
 
     # 3. Random Forest forecast (dashed green line, square markers)
+    target_preds = rf_preds if rf_preds is not None else persist_preds
+    delta_trend = float(target_preds[-1] - origin_val)
+    if delta_trend > 0.0005:
+        trend_label = f"Upcoming Trend: Increment (+{delta_trend:.4f} m)"
+        trend_border = "#16a34a"
+        trend_bg = "#f0fdf4"
+    elif delta_trend < -0.0005:
+        trend_label = f"Upcoming Trend: Decrement ({delta_trend:.4f} m)"
+        trend_border = "#dc2626"
+        trend_bg = "#fef2f2"
+    else:
+        trend_label = f"Upcoming Trend: Steady ({delta_trend:+.4f} m)"
+        trend_border = "#475569"
+        trend_bg = "#f8fafc"
+
     if rf_preds is not None:
         all_rf_x = [origin_time] + fc_times
         all_rf_y = [origin_val] + list(rf_preds)
@@ -129,7 +144,7 @@ def seven_plus_three_chart(
             name="Random Forest Regressor (ML)",
             line=dict(color=_PRED_RF, width=2.5, dash="dot"),
             marker=dict(size=10, color=_PRED_RF, symbol="square", line=dict(color="white", width=1)),
-            text=[""] + [f"{v:.3f}m" for v in rf_preds],
+            text=[""] + [f"{v:.3f}m ({v - origin_val:+.3f}m)" for v in rf_preds],
             textposition="bottom right",
             textfont=dict(size=10, color=_PRED_RF),
             hovertemplate="<b>Random Forest</b>: %{y:.4f} m<br><b>Target</b>: %{x|%Y-%m-%d}<extra></extra>",
@@ -146,7 +161,7 @@ def seven_plus_three_chart(
         annotation_font=dict(size=11, color="#4a5568"),
     )
 
-    # Shaded forecast horizon region
+    # Shaded forecast horizon region with Trend Annotation
     if len(fc_times) > 0:
         fig.add_vrect(
             x0=origin_time,
@@ -155,9 +170,9 @@ def seven_plus_three_chart(
             opacity=0.45,
             layer="below",
             line_width=0,
-            annotation_text="3-Day Forecast Horizon (Day+1 to Day+3)",
-            annotation_position="bottom right",
-            annotation_font=dict(size=11, color="#2b6cb0"),
+            annotation_text=f"<b>{trend_label}</b>",
+            annotation_position="top right",
+            annotation_font=dict(size=11, color=trend_border),
         )
 
     fig.update_layout(
