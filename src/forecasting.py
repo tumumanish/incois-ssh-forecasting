@@ -148,6 +148,7 @@ def train_random_forest(
         "horizon": horizon,
         "n_estimators": 100,
         "random_state": random_state,
+        "feature_importances": [float(v) for v in model.feature_importances_],
     }
     if len(X_val) > 0:
         from sklearn.metrics import mean_absolute_error

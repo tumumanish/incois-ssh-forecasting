@@ -408,6 +408,44 @@ def build_ocean_map(
     return m
 
 
+def feature_importance_chart(
+    importances: list[float] | np.ndarray,
+    title: str = "Random Forest: Predictive Influence of Past 7 Days",
+) -> go.Figure:
+    """Bar chart displaying relative feature importance across the 7-day input window."""
+    vals = [float(v) for v in importances]
+    if not vals:
+        fig = go.Figure()
+        fig.update_layout(title="No feature importance available.", template="plotly_white")
+        return fig
+
+    labels = [
+        f"T - {len(vals) - 1 - i}" if i < len(vals) - 1 else "T = 0 (Origin)"
+        for i in range(len(vals))
+    ]
+    pct_vals = [round(v * 100, 2) for v in vals]
+
+    fig = go.Figure(go.Bar(
+        x=labels,
+        y=pct_vals,
+        text=[f"{p:.1f}%" for p in pct_vals],
+        textposition="auto",
+        marker=dict(
+            color=pct_vals,
+            colorscale="Greens",
+            showscale=False,
+        ),
+    ))
+    fig.update_layout(
+        title=dict(text=title, font=dict(size=14, color="#1e3d59")),
+        xaxis_title="Input Day in 7-Day Observation Window",
+        yaxis_title="Relative Predictive Importance (%)",
+        template="plotly_white",
+        margin=dict(l=50, r=20, t=50, b=40),
+    )
+    return fig
+
+
 def location_map_html(grid_lat: float, grid_lon: float, req_lat: float, req_lon: float) -> str:
     """Return an HTML string with a Folium map showing the selected grid cell."""
     m = build_ocean_map(req_lat, req_lon, grid_lat, grid_lon)

@@ -8,9 +8,11 @@ import pytest
 import plotly.graph_objects as go
 
 from src.visualization import (
+    feature_importance_chart,
     forecast_chart,
     location_map_html,
     metrics_bar_chart,
+    seven_plus_three_chart,
     ssh_history_chart,
     validation_scatter,
 )
@@ -119,3 +121,34 @@ class TestLocationMapHtml:
         html = location_map_html(12.083, 88.083, 12.0, 88.0)
         # Either folium HTML or fallback text should mention the grid coordinates
         assert "12" in html and "88" in html
+
+
+class TestSevenPlusThreeChart:
+    def test_returns_figure(self):
+        window = _synthetic_window()
+        dates = pd.date_range("2024-01-31", periods=3, tz="UTC")
+        persist = np.array([0.43, 0.43, 0.43])
+        rf = np.array([0.428, 0.427, 0.426])
+        fig = seven_plus_three_chart(window, dates, persist, rf)
+        assert isinstance(fig, go.Figure)
+        assert len(fig.data) >= 3
+
+    def test_without_rf(self):
+        window = _synthetic_window()
+        dates = pd.date_range("2024-01-31", periods=3, tz="UTC")
+        persist = np.array([0.43, 0.43, 0.43])
+        fig = seven_plus_three_chart(window, dates, persist, None)
+        assert isinstance(fig, go.Figure)
+        assert len(fig.data) >= 2
+
+
+class TestFeatureImportanceChart:
+    def test_returns_figure_with_data(self):
+        importances = [0.05, 0.05, 0.1, 0.1, 0.15, 0.2, 0.35]
+        fig = feature_importance_chart(importances)
+        assert isinstance(fig, go.Figure)
+        assert len(fig.data) == 1
+
+    def test_empty_returns_figure(self):
+        fig = feature_importance_chart([])
+        assert isinstance(fig, go.Figure)

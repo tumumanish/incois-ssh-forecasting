@@ -36,6 +36,7 @@ from src.forecasting import forecast, persistence_forecast, train_random_forest
 from src.visualization import (
     COASTAL_PRESETS,
     build_ocean_map,
+    feature_importance_chart,
     forecast_chart,
     location_map_html,
     metrics_bar_chart,
@@ -771,6 +772,14 @@ if st.session_state.forecast_dates is not None and window_df is not None:
             </div>
             """,
             unsafe_allow_html=True,
+        )
+
+    # Feature Importance Chart if Random Forest was trained
+    if st.session_state.rf_training and st.session_state.rf_training.get("feature_importances"):
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        st.plotly_chart(
+            feature_importance_chart(st.session_state.rf_training["feature_importances"]),
+            use_container_width=True,
         )
 else:
     st.info("ℹ️ Run the forecast generator to view side-by-side model predictions.")
