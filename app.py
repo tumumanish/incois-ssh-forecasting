@@ -639,6 +639,8 @@ with map_col:
 
 with details_col:
     st.markdown("#### 🧭 Coordinates & Grid")
+    glat_str = f"{grid_lat_val:.4f}° N" if grid_lat_val is not None else "Awaiting fetch"
+    glon_str = f"{grid_lon_val:.4f}° E" if grid_lon_val is not None else "Awaiting fetch"
     st.markdown(
         f"""
         **Target Point:**
@@ -647,8 +649,8 @@ with details_col:
         - **Preset:** *{selected_preset}*
         
         **Copernicus Cell:**
-        - **Grid Lat:** `{grid_lat_val:.4f}° N` if grid_lat_val else `Awaiting fetch`
-        - **Grid Lon:** `{grid_lon_val:.4f}° E` if grid_lon_val else `Awaiting fetch`
+        - **Grid Lat:** `{glat_str}`
+        - **Grid Lon:** `{glon_str}`
         """
     )
     if loc_info:
